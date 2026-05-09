@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Smart Lighting Security Robot — Setup Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&amp;family=DM+Sans:wght@300;400;500;600&amp;family=Fraunces:ital,wght@0,300;0,600;1,300&amp;display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --teal: #00A896;
+    --teal-dim: #007d71;
+    --navy: #0D1B2A;
+    --navy-mid: #1C3A4A;
+    --bg: #F2FAF8;
+    --bg-card: #ffffff;
+    --text: #0D1B2A;
+    --muted: #4a6572;
+    --border: #c8e6e2;
+    --step1: #00A896;
+    --step2: #065A82;
+    --step3: #0D6E62;
+    --step4: #1A4A3A;
+    --step5: #2C5F7A;
+    --warn: #E07B39;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: var(--navy);
+    padding: 3rem 1.5rem 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 320px; height: 320px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,168,150,0.18) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; left: -40px;
+    width: 220px; height: 220px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,168,150,0.10) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: rgba(0,168,150,0.15);
+    border: 1px solid rgba(0,168,150,0.3);
+    color: var(--teal);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.35rem 0.75rem;
+    border-radius: 100px;
+    margin-bottom: 1.25rem;
+  }
+  .hero-badge::before { content: '●'; font-size: 0.55rem; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .hero h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: clamp(2rem, 7vw, 3rem);
+    color: #fff;
+    line-height: 1.15;
+    margin-bottom: 0.75rem;
+  }
+  .hero h1 em {
+    font-style: italic;
+    color: var(--teal);
+  }
+  .hero p {
+    font-size: 0.95rem;
+    color: rgba(255,255,255,0.6);
+    font-weight: 300;
+    line-height: 1.6;
+    max-width: 440px;
+    margin-bottom: 2rem;
+  }
+  .hero-stats {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .hero-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+  .hero-stat .val {
+    font-family: 'Fraunces', serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--teal);
+    line-height: 1;
+  }
+  .hero-stat .lbl {
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.45);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  /* ── NAV ── */
+  .toc {
+    background: var(--navy-mid);
+    padding: 0.9rem 1.5rem;
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid rgba(0,168,150,0.2);
+  }
+  .toc::-webkit-scrollbar { display: none; }
+  .toc a {
+    text-decoration: none;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.45);
+    white-space: nowrap;
+    padding: 0.35rem 0.75rem;
+    border-radius: 100px;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+  }
+  .toc a:hover {
+    color: var(--teal);
+    border-color: rgba(0,168,150,0.3);
+    background: rgba(0,168,150,0.08);
+  }
+
+  /* ── MAIN CONTAINER ── */
+  .container { max-width: 680px; margin: 0 auto; padding: 0 1.25rem; }
+
+  /* ── SECTION ── */
+  section { padding: 2.5rem 0 1rem; }
+  .section-label {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+  }
+  .section-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--teal);
+    letter-spacing: 0.1em;
+    background: rgba(0,168,150,0.1);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+  }
+  .section-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 1.4rem;
+    color: var(--navy);
+    line-height: 1.2;
+    margin-bottom: 0.75rem;
+  }
+  .section-desc {
+    font-size: 0.9rem;
+    color: var(--muted);
+    line-height: 1.65;
+    margin-bottom: 1.5rem;
+  }
+
+  /* ── STEP CARDS ── */
+  .steps { display: flex; flex-direction: column; gap: 1rem; }
+  .step-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .step-card:active { transform: scale(0.99); }
+
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 1rem 1.1rem;
+    cursor: pointer;
+    user-select: none;
+  }
+  .step-icon {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+  .step-meta { flex: 1; }
+  .step-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 0.15rem;
+  }
+  .step-name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--navy);
+  }
+  .step-time {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--teal);
+    background: rgba(0,168,150,0.08);
+    padding: 0.2rem 0.5rem;
+    border-radius: 100px;
+    white-space: nowrap;
+  }
+  .step-chevron {
+    color: var(--muted);
+    font-size: 0.8rem;
+    transition: transform 0.25s;
+    flex-shrink: 0;
+  }
+  .step-card.open .step-chevron { transform: rotate(180deg); }
+
+  .step-body {
+    display: none;
+    padding: 0 1.1rem 1.2rem;
+    border-top: 1px solid var(--border);
+  }
+  .step-card.open .step-body { display: block; }
+
+  .step-body p {
+    font-size: 0.875rem;
+    color: var(--muted);
+    line-height: 1.65;
+    margin-top: 0.9rem;
+    margin-bottom: 0.75rem;
+  }
+
+  /* Sub-steps */
+  .substeps { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.8rem; }
+  .substep {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+  .substep-num {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--navy);
+    color: #fff;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 0.05rem;
+  }
+  .substep-text {
+    font-size: 0.855rem;
+    color: var(--text);
+    line-height: 1.55;
+  }
+  .substep-text strong { font-weight: 600; color: var(--navy); }
+  .substep-text code {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    background: #e8f5f3;
+    color: var(--teal-dim);
+    padding: 0.1rem 0.35rem;
+    border-radius: 4px;
+  }
+
+  /* ── CODE BLOCK ── */
+  .code-block {
+    background: var(--navy);
+    border-radius: 10px;
+    padding: 1rem 1.1rem;
+    margin: 0.8rem 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .code-block::before {
+    content: attr(data-label);
+    position: absolute;
+    top: 0.55rem; right: 0.75rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.25);
+  }
+  .code-block pre {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: #a8d8d0;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+  .code-block pre .kw { color: #7ed8f6; }
+  .code-block pre .cm { color: rgba(255,255,255,0.3); font-style: italic; }
+  .code-block pre .str { color: #f0c27f; }
+  .code-block pre .num { color: #b5e8c8; }
+
+  /* ── ALERT / TIP ── */
+  .tip, .warn-box, .success-box {
+    border-radius: 10px;
+    padding: 0.85rem 1rem;
+    margin: 0.85rem 0;
+    font-size: 0.845rem;
+    line-height: 1.55;
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+  }
+  .tip { background: rgba(0,168,150,0.07); border: 1px solid rgba(0,168,150,0.2); color: var(--navy-mid); }
+  .warn-box { background: rgba(224,123,57,0.08); border: 1px solid rgba(224,123,57,0.25); color: #7a3c10; }
+  .success-box { background: rgba(22,163,74,0.07); border: 1px solid rgba(22,163,74,0.2); color: #14532d; }
+  .tip-icon { font-size: 1rem; flex-shrink: 0; margin-top: 0.05rem; }
+
+  /* ── COMPONENT TABLE ── */
+  .comp-table { width: 100%; border-collapse: collapse; margin: 0.9rem 0; font-size: 0.83rem; }
+  .comp-table th {
+    background: var(--navy);
+    color: rgba(255,255,255,0.75);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.6rem 0.8rem;
+    text-align: left;
+  }
+  .comp-table th:first-child { border-radius: 8px 0 0 0; }
+  .comp-table th:last-child { border-radius: 0 8px 0 0; }
+  .comp-table td {
+    padding: 0.65rem 0.8rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    vertical-align: top;
+  }
+  .comp-table tr:last-child td { border-bottom: none; }
+  .comp-table tr:nth-child(even) td { background: rgba(0,168,150,0.03); }
+  .comp-table .aed {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--teal);
+    white-space: nowrap;
+  }
+  .comp-table .total-row td {
+    background: var(--navy) !important;
+    color: white;
+    font-weight: 600;
+  }
+  .comp-table .total-row .aed { color: var(--teal); }
+
+  /* ── WIRING DIAGRAM ── */
+  .wiring-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+    margin: 0.9rem 0;
+  }
+  .wire-conn {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.75rem 0.85rem;
+  }
+  .wire-from {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--teal);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.15rem;
+  }
+  .wire-arrow {
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin: 0.1rem 0;
+  }
+  .wire-to {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--navy);
+  }
+
+  /* ── PROGRESS BAR ── */
+  .progress-wrap {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1rem 1.1rem;
+    margin-bottom: 1.5rem;
+  }
+  .progress-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.5rem;
+  }
+  .progress-steps {
+    display: flex;
+    gap: 0.3rem;
+  }
+  .prog-step {
+    flex: 1;
+    height: 5px;
+    border-radius: 100px;
+    background: var(--border);
+    transition: background 0.4s;
+  }
+  .prog-step.done { background: var(--teal); }
+
+  /* ── CHECKLIST ── */
+  .checklist { display: flex; flex-direction: column; gap: 0.45rem; margin: 0.8rem 0; }
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.6rem 0.85rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    cursor: pointer;
+    user-select: none;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .check-item.checked {
+    border-color: rgba(0,168,150,0.35);
+    background: rgba(0,168,150,0.05);
+  }
+  .check-box {
+    width: 20px; height: 20px;
+    border-radius: 5px;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    font-size: 0.7rem;
+    color: transparent;
+  }
+  .check-item.checked .check-box {
+    background: var(--teal);
+    border-color: var(--teal);
+    color: white;
+  }
+  .check-label {
+    font-size: 0.855rem;
+    color: var(--navy);
+    line-height: 1.4;
+  }
+  .check-item.checked .check-label {
+    color: var(--muted);
+    text-decoration: line-through;
+  }
+
+  /* ── TROUBLESHOOT ── */
+  .trouble-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 0.7rem;
+    overflow: hidden;
+  }
+  .trouble-q {
+    padding: 0.85rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--navy);
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .trouble-q::after { content: '▾'; color: var(--muted); font-size: 0.8rem; flex-shrink: 0; }
+  .trouble-a {
+    display: none;
+    padding: 0 1rem 0.9rem;
+    font-size: 0.845rem;
+    color: var(--muted);
+    line-height: 1.65;
+    border-top: 1px solid var(--border);
+    padding-top: 0.75rem;
+  }
+  .trouble-item.open .trouble-a { display: block; }
+
+  /* ── FOOTER ── */
+  .footer {
+    background: var(--navy);
+    color: rgba(255,255,255,0.4);
+    text-align: center;
+    padding: 2rem 1.5rem;
+    margin-top: 3rem;
+    font-size: 0.78rem;
+    line-height: 1.7;
+  }
+  .footer strong { color: var(--teal); font-weight: 500; }
+
+  /* ── DIVIDER ── */
+  .divider {
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--border), transparent);
+    margin: 0.5rem 0;
+  }
+
+  /* ── SDG BADGES ── */
+  .sdg-row { display: flex; gap: 0.6rem; margin: 1rem 0; flex-wrap: wrap; }
+  .sdg-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.45rem 0.8rem;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid;
+  }
+  .sdg7 { background: rgba(0,168,150,0.08); border-color: rgba(0,168,150,0.3); color: var(--teal-dim); }
+  .sdg11 { background: rgba(6,90,130,0.08); border-color: rgba(6,90,130,0.3); color: #065A82; }
+
+  @media (max-width: 400px) {
+    .wiring-grid { grid-template-columns: 1fr; }
+    .hero-stats { gap: 1rem; }
+  }
+</style>
+</head>
+<body>
+<!-- HERO -->
+<div class="hero">
+<div class="container">
+<div class="hero-badge">Setup Guide · v1.0</div>
+<h1>Smart <em>Lighting</em><br/>Security Robot</h1>
+<p>A step-by-step installation guide for your room-scanning smart lighting robot with Adaptive Intruder Detection Mode. Follow the wiring carefully, then upload the code to test normal lighting and security alarm behavior.</p>
+<div class="hero-stats">
+<div class="hero-stat"><span class="val">5</span><span class="lbl">Steps</span></div>
+<div class="hero-stat"><span class="val">60+</span><span class="lbl">Minutes</span></div>
+<div class="hero-stat"><span class="val">235</span><span class="lbl">AED total</span></div>
+</div>
+<div class="divider"></div>
+</div>
+</div>
+<!-- STICKY NAV -->
+<nav class="toc">
+<a href="#parts">Parts</a>
+<a href="#wiring">Wiring</a>
+<a href="#code">Code</a>
+<a href="#test">Test</a>
+</nav>
+<div class="container">
+<!-- ── PARTS ── -->
+<section id="parts">
+<div class="section-label">
+<span class="section-num">Step 01</span>
+</div>
+<div class="section-title">Gather your parts</div>
+<p class="section-desc">All components are available on Amazon.ae, Noon.com, or local electronics shops in Abu Dhabi. The ESP8266 NodeMCU LoLin board is the controller, and the PIR sensor is mounted on the servo so the robot can scan the room.</p>
+<div class="steps">
+<div class="step-card open" data-step="1">
+<div class="step-header" onclick="toggleStep(this)">
+<div class="step-icon" style="background:#e8f5f3;">📦</div>
+<div class="step-meta">
+<div class="step-num">Step 01</div>
+<div class="step-name">Parts list &amp; costs</div>
+</div>
+<span class="step-time">30 min</span>
+<span class="step-chevron">▾</span>
+</div>
+<div class="step-body">
+<table class="comp-table">
+<thead>
+<tr>
+<th>Component</th>
+<th>Purpose</th>
+<th>Cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ESP8266 NodeMCU LoLin</strong></td>
+<td>Main microcontroller with built-in Wi-Fi</td>
+<td class="aed">20 AED</td>
+</tr>
+<tr>
+<td><strong>HC-SR501 PIR Motion Sensor</strong></td>
+<td>Detects human presence using infrared motion</td>
+<td class="aed">20 AED</td>
+</tr>
+<tr>
+<td><strong>Servo Motor (SG90)</strong></td>
+<td>Rotates the PIR sensor to scan the room</td>
+<td class="aed">~15 AED</td>
+</tr>
+<tr>
+<td><strong>RTC Module (DS3231)</strong></td>
+<td>Tracks real time for time-based operation</td>
+<td class="aed">~20 AED</td>
+</tr>
+<tr>
+<td><strong>Relay Module (5V)</strong></td>
+<td>Controls the room light ON/OFF</td>
+<td class="aed">~20 AED</td>
+</tr>
+<tr>
+<td><strong>Active Buzzer</strong></td>
+<td>Sounds the security alarm</td>
+<td class="aed">~25 AED</td>
+</tr>
+<tr>
+<td><strong>Red LED</strong></td>
+<td>Visual flashing alarm indicator</td>
+<td class="aed">~10 AED</td>
+</tr>
+<tr>
+<td><strong>Push Button</strong></td>
+<td>Manual arm/disarm control</td>
+<td class="aed">~5 AED</td>
+</tr>
+<tr>
+<td><strong>CR2032 Coin Battery</strong></td>
+<td>Powers the RTC module backup</td>
+<td class="aed">~5 AED</td>
+</tr>
+<tr>
+<td><strong>Breadboard + Jumper Wires</strong></td>
+<td>Connects all components without soldering</td>
+<td class="aed">55 AED</td>
+</tr>
+<tr>
+<td><strong>Micro USB Cable / Power Supply</strong></td>
+<td>Powers and programs the ESP8266</td>
+<td class="aed">~40 AED</td>
+</tr>
+<tr class="total-row">
+<td colspan="2"><strong>Total</strong></td>
+<td class="aed">~235 AED</td>
+</tr>
+</tbody>
+</table>
+<div class="tip">
+<span class="tip-icon">🛒</span>
+<span>Search <strong>"NodeMCU ESP8266 LoLin"</strong>, <strong>"HC-SR501 PIR"</strong>, <strong>"SG90 servo"</strong>, and <strong>"DS3231 RTC"</strong> for the main parts.</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<div class="divider"></div>
+<!-- ── WIRING ── -->
+<section id="wiring">
+<div class="section-label">
+<span class="section-num">Step 02</span>
+</div>
+<div class="section-title">Wire the robot circuit</div>
+<p class="section-desc">Use the breadboard and MM jumper wires to connect the ESP8266 NodeMCU LoLin to the PIR sensor, servo, RTC, relay, buzzer, LED, and push button. The LoLin board labels 3.3V as <strong>3U</strong>, ground as <strong>G</strong>, and 5V as <strong>VIN</strong>.</p>
+<div class="steps">
+<div class="step-card open" data-step="2">
+<div class="step-header" onclick="toggleStep(this)">
+<div class="step-icon" style="background:#e3f0f7;">🔌</div>
+<div class="step-meta">
+<div class="step-num">Step 02</div>
+<div class="step-name">Main wiring connections</div>
+</div>
+<span class="step-time">20 min</span>
+<span class="step-chevron">▾</span>
+</div>
+<div class="step-body">
+<p>Connect every component exactly as shown below. Keep all grounds connected to the ESP8266 <code>G</code> pins.</p>
+<div class="wiring-grid">
+<div class="wire-conn"><div class="wire-from">PIR VCC</div><div class="wire-arrow">↓ connects to</div><div class="wire-to">ESP8266 <code>3U / 3.3V</code></div></div>
+<div class="wire-conn"><div class="wire-from">PIR GND</div><div class="wire-arrow">↓ connects to</div><div class="wire-to">ESP8266 <code>G</code></div></div>
+<div class="wire-conn"><div class="wire-from">PIR OUT</div><div class="wire-arrow">↓ connects to</div><div class="wire-to">ESP8266 <code>D5</code> (GPIO14)</div></div>
+<div class="wire-conn"><div class="wire-from">Servo red</div><div class="wire-arrow">↓ connects to</div><div class="wire-to">ESP8266 <code>VIN</code> (5V)</div></div>
+<div class="wire-conn"><div class="wire-from">Servo brown</div><div class="wire-arrow">↓ connects to</div><div class="wire-to">ESP8266 <code>G</code></div></div>
+<div class="wire-conn"><div class="wire-from">Servo orange</div><div class="wire-arrow">↓ connects to</div><div class="wire-to">ESP8266 <code>D4</code> (GPIO2)</div></div>
+<div class="wire-conn"><div class="wire-from">RTC VCC</div><div class="wire-arrow">↓ connects to</div><div class="wire-to">ESP8266 <code>3U / 3.3V</code></div></div>
+<div class="wire-conn"><div class="wire-from">RTC GND</div><div class="wire-arrow">↓ connects to</div><div class="wire-to">ESP8266 <code>G</code></div></div>
+<div class="wire-conn"><div class="wire-from">RTC SDA</div><div class="wire-arrow">↓ connects to</div><div class="wire-to">ESP8266 <code>D2</code> (GPIO4)</div></div>
+<div class="wire-conn"><div class="wire-from">RTC SCL</div><div class="wire-arrow">↓ connects to</div><div class="wire-to">ESP8266 <code>D1</code> (GPIO5)</div></div>
+<div class="wire-conn"><div class="wire-from">Relay VCC</div><div class="wire-arrow">↓ connects to</div><div class="wire-to">ESP8266 <code>VIN</code> (5V)</div></div>
+<div class="wire-conn"><div class="wire-from">Relay GND</div><div class="wire-arrow">↓ connects to</div><div class="wire-to">ESP8266 <code>G</code></div></div>
+<div class="wire-conn"><div class="wire-from">Relay IN</div><div class="wire-arrow">↓ connects to</div><div class="wire-to">ESP8266 <code>D6</code> (GPIO12)</div></div>
+<div class="wire-conn"><div class="wire-from">Buzzer +</div><div class="wire-arrow">↓ connects to</div><div class="wire-to">ESP8266 <code>D7</code> (GPIO13)</div></div>
+<div class="wire-conn"><div class="wire-from">Buzzer -</div><div class="wire-arrow">↓ connects to</div><div class="wire-to">ESP8266 <code>G</code></div></div>
+<div class="wire-conn"><div class="wire-from">Red LED +</div><div class="wire-arrow">↓ through 220 Ω resistor to</div><div class="wire-to">ESP8266 <code>D8</code> (GPIO15)</div></div>
+<div class="wire-conn"><div class="wire-from">Red LED -</div><div class="wire-arrow">↓ connects to</div><div class="wire-to">ESP8266 <code>G</code></div></div>
+<div class="wire-conn"><div class="wire-from">Push button</div><div class="wire-arrow">↓ one leg to</div><div class="wire-to">ESP8266 <code>D3</code> (GPIO0)</div></div>
+<div class="wire-conn"><div class="wire-from">Push button</div><div class="wire-arrow">↓ diagonal opposite leg to</div><div class="wire-to">ESP8266 <code>G</code></div></div>
+</div>
+<div class="tip" style="margin-top:0.9rem;">
+<span class="tip-icon">🤖</span>
+<span><strong>Mounting tip:</strong> Fix the PIR sensor on top of the SG90 servo horn so the servo can rotate it from 0° to 180° and scan the room.</span>
+</div>
+<div class="warn-box" style="margin-top:0.9rem;">
+<span class="tip-icon">⚠️</span>
+<span><strong>Safety first:</strong> For a classroom prototype, test the relay using a safe LED or small low-voltage load before connecting any real AC room light. Ask a qualified person before working with mains electricity.</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<div class="divider"></div>
+<!-- ── CODE ── -->
+<section id="code">
+<div class="section-label">
+<span class="section-num">Step 03</span>
+</div>
+<div class="section-title">Upload the code</div>
+<p class="section-desc">Download the free Arduino IDE, install the ESP8266 board package, then copy and upload the code below. You may also need to install the Servo, Wire, and RTClib libraries.</p>
+<div class="steps">
+<div class="step-card" data-step="3a">
+<div class="step-header" onclick="toggleStep(this)">
+<div class="step-icon" style="background:#e8f5f3;">💻</div>
+<div class="step-meta">
+<div class="step-num">Step 03a</div>
+<div class="step-name">Install Arduino IDE</div>
+</div>
+<span class="step-time">3 min</span>
+<span class="step-chevron">▾</span>
+</div>
+<div class="step-body">
+<div class="substeps">
+<div class="substep">
+<div class="substep-num">1</div>
+<div class="substep-text">Go to <strong>arduino.cc/en/software</strong> and download the IDE for your operating system (Windows, Mac, or Linux).</div>
+</div>
+<div class="substep">
+<div class="substep-num">2</div>
+<div class="substep-text">Install it. When it opens, go to <strong>File → Preferences</strong>.</div>
+</div>
+<div class="substep">
+<div class="substep-num">3</div>
+<div class="substep-text">In the <strong>"Additional Boards Manager URLs"</strong> field, paste this URL exactly:</div>
+</div>
+</div>
+<div class="code-block" data-label="URL">
+<pre>http://arduino.esp8266.com/stable/package_esp8266com_index.json</pre>
+</div>
+<div class="substeps">
+<div class="substep">
+<div class="substep-num">4</div>
+<div class="substep-text">Go to <strong>Tools → Board → Boards Manager</strong>. Search <code>esp8266</code> and click Install.</div>
+</div>
+<div class="substep">
+<div class="substep-num">5</div>
+<div class="substep-text">Go to <strong>Tools → Board</strong> and select <code>NodeMCU 1.0 (ESP-12E Module)</code>.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="step-card" data-step="3b">
+<div class="step-header" onclick="toggleStep(this)">
+<div class="step-icon" style="background:#e3f0f7;">📋</div>
+<div class="step-meta">
+<div class="step-num">Step 03b</div>
+<div class="step-name">Copy &amp; upload the code</div>
+</div>
+<span class="step-time">5 min</span>
+<span class="step-chevron">▾</span>
+</div>
+<div class="step-body">
+<p>Create a new sketch in Arduino IDE, delete everything, and paste the code below. This version runs the scanning servo, normal lighting mode, and Adaptive Intruder Detection Mode using the button.</p>
+<div class="code-block" data-label="Arduino C++">
+<pre>#include &lt;Servo.h&gt;
+#include &lt;Wire.h&gt;
+#include &lt;RTClib.h&gt;
+
+// GPIO pin numbers for Generic ESP8266 Module
+const int YELLOW_LED_PIN = 16; // D0
+const int RTC_SCL_PIN    = 5;  // D1
+const int RTC_SDA_PIN    = 4;  // D2
+const int BUTTON_PIN     = 0;  // D3
+const int SERVO_PIN      = 2;  // D4
+const int PIR_PIN        = 14; // D5
+const int RELAY_PIN      = 12; // D6
+const int BUZZER_PIN     = 13; // D7
+const int RED_LED_PIN    = 15; // D8
+
+const int RELAY_ON = HIGH;
+const int RELAY_OFF = LOW;
+
+Servo scanServo;
+RTC_DS3231 rtc;
+
+bool securityMode = false;
+bool motionDetected = false;
+
+unsigned long lastMotionTime = 0;
+const unsigned long roomEmptyDelay = 10000;
+
+unsigned long lastServoMove = 0;
+int servoAngle = 0;
+int servoStep = 30;
+bool servoForward = true;
+
+unsigned long lastAlarmFlash = 0;
+bool alarmFlashState = false;
+
+unsigned long lastButtonChange = 0;
+bool lastButtonReading = HIGH;
+bool stableButtonState = HIGH;
+const unsigned long debounceDelay = 50;
+
+void setup() {
+  Serial.begin(115200);
+
+  pinMode(YELLOW_LED_PIN, OUTPUT);
+  pinMode(RELAY_PIN, OUTPUT);
+  pinMode(RED_LED_PIN, OUTPUT);
+  pinMode(BUZZER_PIN, OUTPUT);
+  pinMode(PIR_PIN, INPUT);
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
+
+  digitalWrite(YELLOW_LED_PIN, LOW);
+  digitalWrite(RELAY_PIN, RELAY_OFF);
+  digitalWrite(RED_LED_PIN, LOW);
+  digitalWrite(BUZZER_PIN, LOW);
+
+  scanServo.attach(SERVO_PIN);
+  scanServo.write(90);
+
+  Wire.begin(RTC_SDA_PIN, RTC_SCL_PIN);
+
+  if (!rtc.begin()) {
+    Serial.println("RTC not found. Continuing without RTC.");
+  } else {
+    if (rtc.lostPower()) {
+      Serial.println("RTC lost power. Setting compile time.");
+      rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+    }
+    Serial.println("RTC ready.");
+  }
+
+  Serial.println("PIR warming up...");
+  delay(30000);
+  Serial.println("System ready.");
+}
+
+void loop() {
+  handleButton();
+  scanRoom();
+  readPIR();
+
+  if (securityMode) {
+    handleSecurityMode();
+  } else {
+    handleNormalMode();
+  }
+
+  printStatus();
+}
+
+void handleButton() {
+  bool reading = digitalRead(BUTTON_PIN);
+
+  if (reading != lastButtonReading) {
+    lastButtonChange = millis();
+  }
+
+  if (millis() - lastButtonChange &gt; debounceDelay) {
+    if (reading != stableButtonState) {
+      stableButtonState = reading;
+
+      if (stableButtonState == LOW) {
+        securityMode = !securityMode;
+        Serial.print("Mode changed to: ");
+        Serial.println(securityMode ? "SECURITY / ARMED" : "NORMAL / DISARMED");
+
+        if (!securityMode) {
+          stopAlarm();
+          turnRoomLightOff();
+        }
+      }
+    }
+  }
+
+  lastButtonReading = reading;
+}
+
+void scanRoom() {
+  if (millis() - lastServoMove &gt;= 500) {
+    lastServoMove = millis();
+    scanServo.write(servoAngle);
+
+    if (servoForward) {
+      servoAngle += servoStep;
+      if (servoAngle &gt;= 180) {
+        servoAngle = 180;
+        servoForward = false;
+      }
+    } else {
+      servoAngle -= servoStep;
+      if (servoAngle &lt;= 0) {
+        servoAngle = 0;
+        servoForward = true;
+      }
+    }
+  }
+}
+
+void readPIR() {
+  motionDetected = digitalRead(PIR_PIN);
+  if (motionDetected == HIGH) {
+    lastMotionTime = millis();
+  }
+}
+
+void handleNormalMode() {
+  stopAlarm();
+
+  if (motionDetected == HIGH) {
+    turnRoomLightOn();
+  }
+
+  if (millis() - lastMotionTime &gt; roomEmptyDelay) {
+    turnRoomLightOff();
+  }
+}
+
+void handleSecurityMode() {
+  if (motionDetected == HIGH) {
+    alarmAction();
+  } else {
+    stopAlarm();
+  }
+}
+
+void turnRoomLightOn() {
+  digitalWrite(YELLOW_LED_PIN, HIGH);
+  digitalWrite(RELAY_PIN, RELAY_ON);
+}
+
+void turnRoomLightOff() {
+  digitalWrite(YELLOW_LED_PIN, LOW);
+  digitalWrite(RELAY_PIN, RELAY_OFF);
+}
+
+void alarmAction() {
+  if (millis() - lastAlarmFlash &gt;= 200) {
+    lastAlarmFlash = millis();
+    alarmFlashState = !alarmFlashState;
+
+    digitalWrite(RED_LED_PIN, alarmFlashState);
+    digitalWrite(BUZZER_PIN, alarmFlashState);
+    digitalWrite(YELLOW_LED_PIN, alarmFlashState);
+    digitalWrite(RELAY_PIN, alarmFlashState ? RELAY_ON : RELAY_OFF);
+  }
+}
+
+void stopAlarm() {
+  digitalWrite(RED_LED_PIN, LOW);
+  digitalWrite(BUZZER_PIN, LOW);
+}
+
+void printStatus() {
+  static unsigned long lastPrint = 0;
+  if (millis() - lastPrint &gt;= 3000) {
+    lastPrint = millis();
+    Serial.print("Mode: ");
+    Serial.print(securityMode ? "SECURITY" : "NORMAL");
+    Serial.print(" | Motion: ");
+    Serial.print(motionDetected ? "YES" : "NO");
+    Serial.print(" | Servo angle: ");
+    Serial.println(servoAngle);
+  }
+}</pre>
+</div>
+<div class="tip">
+<span class="tip-icon">📡</span>
+<span>To change the timeout: edit <code>TIMEOUT</code>. The default is <code>300000</code> (5 minutes). For 10 minutes use <code>600000</code>. For 30 minutes use <code>1800000</code>.</span>
+</div>
+<div class="substeps" style="margin-top:0.9rem;">
+<div class="substep">
+<div class="substep-num">1</div>
+<div class="substep-text">Connect the ESP8266 to your laptop with a micro-USB cable.</div>
+</div>
+<div class="substep">
+<div class="substep-num">2</div>
+<div class="substep-text">In Arduino IDE, go to <strong>Tools → Port</strong> and select the port that appears (usually <code>COM3</code> on Windows or <code>/dev/usbserial</code> on Mac).</div>
+</div>
+<div class="substep">
+<div class="substep-num">3</div>
+<div class="substep-text">Click the <strong>Upload</strong> button (right-pointing arrow). Wait for "Done uploading." message.</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<div class="divider"></div>
+<!-- ── TEST ── -->
+<section id="test">
+<div class="section-label">
+<span class="section-num">Step 04</span>
+</div>
+<div class="section-title">Test the system</div>
+<p class="section-desc">Verify the servo scan, PIR sensor, relay, buzzer, red LED, RTC, and push button using the Serial Monitor before connecting a real light.</p>
+<div class="steps">
+<div class="step-card" data-step="4">
+<div class="step-header" onclick="toggleStep(this)">
+<div class="step-icon" style="background:#e8f5f3;">🧪</div>
+<div class="step-meta">
+<div class="step-num">Step 04</div>
+<div class="step-name">Verify sensor &amp; remote control</div>
+</div>
+<span class="step-time">15 min</span>
+<span class="step-chevron">▾</span>
+</div>
+<div class="step-body">
+<div class="substeps">
+<div class="substep">
+<div class="substep-num">1</div>
+<div class="substep-text">Open <strong>Tools → Serial Monitor</strong> in Arduino IDE. Set baud rate to <code>115200</code>.</div>
+</div>
+<div class="substep">
+<div class="substep-num">2</div>
+<div class="substep-text">You should see <strong>"RTC ready"</strong>, then <strong>"PIR warming up..."</strong>, and finally <strong>"System ready."</strong></div>
+</div>
+<div class="substep">
+<div class="substep-num">3</div>
+<div class="substep-text">Check that the servo rotates the PIR sensor from 0° to 180°. Wave your hand in front of the PIR sensor; the yellow light/relay should turn ON in Normal Mode.</div>
+</div>
+<div class="substep">
+<div class="substep-num">4</div>
+<div class="substep-text">Press the push button to switch to Security Mode. Wave your hand again; the red LED, buzzer, and light should flash rapidly.</div>
+</div>
+</div>
+<div class="success-box" style="margin-top:0.9rem;">
+<span class="tip-icon">✅</span>
+<span>If the servo scans, the relay turns the light on in Normal Mode, and the buzzer/LED flash in Security Mode, the robot is working correctly.</span>
+</div>
+</div>
+</div>
+<!-- Final wiring step -->
+<div class="step-card" data-step="5">
+<div class="step-header" onclick="toggleStep(this)">
+<div class="step-icon" style="background:#fdf0e8;">⚡</div>
+<div class="step-meta">
+<div class="step-num">Step 05</div>
+<div class="step-name">Connect your light</div>
+</div>
+<span class="step-time">15 min</span>
+<span class="step-chevron">▾</span>
+</div>
+<div class="step-body">
+<div class="warn-box">
+<span class="tip-icon">⚠️</span>
+<span><strong>Safety first:</strong> Make sure the light switch on your wall is turned OFF and the lamp is unplugged before doing this step. If you are unsure, ask someone with electrical experience to help.</span>
+</div>
+<p>The relay module has three screw terminals on one side: <strong>COM</strong> (Common), <strong>NO</strong> (Normally Open), and <strong>NC</strong> (Normally Closed). For our setup, use <strong>COM</strong> and <strong>NO</strong>.</p>
+<div class="substeps">
+<div class="substep">
+<div class="substep-num">1</div>
+<div class="substep-text">Cut the live wire (usually brown or red) of your lamp cord. <strong>Do not cut the neutral or earth wire.</strong></div>
+</div>
+<div class="substep">
+<div class="substep-num">2</div>
+<div class="substep-text">Connect one cut end to the <code>COM</code> terminal. Connect the other cut end to the <code>NO</code> terminal.</div>
+</div>
+<div class="substep">
+<div class="substep-num">3</div>
+<div class="substep-text">Plug the lamp back in and power the ESP8266 via USB. Wave your hand — the light should turn on. Wait 5 minutes without moving — it should turn off.</div>
+</div>
+</div>
+<div class="success-box">
+<span class="tip-icon">🎉</span>
+<span><strong>Setup complete!</strong> Your smart lighting robot can now scan the room, control the light, and trigger the intruder alarm in Security Mode.</span>
+</div>
+</div>
+</div>
+</div>
+</section><section id="blynk">
+<div class="section-label">
+<span class="section-num">Step 06</span>
+</div>
+<div class="section-title">Connect Blynk App</div>
+<p class="section-desc">Use the Blynk mobile app to arm/disarm the system and receive intruder alerts.</p>
+<div class="steps">
+<div class="step-card open">
+<div class="step-header">
+<div class="step-icon" style="background:#e8f5f3;">📱</div>
+<div class="step-meta">
+<div class="step-num">Step 06</div>
+<div class="step-name">Setup Blynk</div>
+</div>
+<span class="step-time">5 min</span>
+</div>
+<div class="step-body" style="display:block;">
+<p>Install Blynk IoT app → create account → create a template for ESP8266 → add a device.</p>
+<p>Add widgets: Switch (arm/disarm), Button (silence), LED (status).</p>
+<p>Copy your Auth Token and paste it into your ESP8266 code, then upload.</p>
+<p>When armed, motion triggers buzzer, flashing LED, and sends a phone notification.</p>
+</div>
+</div>
+</div>
+</section>
+</div><!-- /container -->
+<!-- FOOTER -->
+<div class="footer">
+<strong>Smart Lighting Security Robot</strong><br/>
+  GENS 101 Engineering Design Project<br/>
+  Syed Haaris · Tayseer Shaheen · Ahzem Manzeer · Rashed Alsadi<br/><br/>
+  Khalifa University · UAE · 2025<br/>
+<span style="font-size:0.7rem;opacity:0.6;">Aligned with UN SDG 7 &amp; SDG 11</span>
+</div>
+<script>
+  function toggleStep(header) {
+    const card = header.parentElement;
+    card.classList.toggle('open');
+    updateProgress();
+  }
+
+  function toggleCheck(item) {
+    item.classList.toggle('checked');
+    updateProgress();
+  }
+
+  function toggleTrouble(item) {
+    item.classList.toggle('open');
+  }
+
+  function updateProgress() {
+    const checks = document.querySelectorAll('.check-item');
+    const done = document.querySelectorAll('.check-item.checked').length;
+    const steps = document.querySelectorAll('.prog-step');
+    const perStep = Math.ceil(checks.length / steps.length);
+    steps.forEach((s, i) => {
+      s.classList.toggle('done', done >= (i + 1) * perStep);
+    });
+  }
+
+  // Auto-open first step of each section on load
+  document.querySelectorAll('.step-card[data-step="1"], .step-card[data-step="2"]').forEach(c => c.classList.add('open'));
+</script>
+</body>
+</html>
