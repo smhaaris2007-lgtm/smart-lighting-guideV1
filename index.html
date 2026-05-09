@@ -793,210 +793,181 @@
 <span class="step-chevron">▾</span>
 </div>
 <div class="step-body">
-<p>Create a new sketch in Arduino IDE, delete everything, and paste the code below. This version runs the scanning servo, normal lighting mode, and Adaptive Intruder Detection Mode using the button.</p>
+<p>Create a new sketch in Arduino IDE, delete everything, and paste the code below. Replace the Blynk Template ID, Template Name, Auth Token, Wi-Fi name, and Wi-Fi password before uploading.</p>
 <div class="code-block" data-label="Arduino C++">
-<pre>#include &lt;Servo.h&gt;
-#include &lt;Wire.h&gt;
-#include &lt;RTClib.h&gt;
+<pre>// PIR Light + Security Mode System with Blynk
+// ESP8266 NodeMCU LoLin
 
-// GPIO pin numbers for Generic ESP8266 Module
-const int YELLOW_LED_PIN = 16; // D0
-const int RTC_SCL_PIN    = 5;  // D1
-const int RTC_SDA_PIN    = 4;  // D2
-const int BUTTON_PIN     = 0;  // D3
-const int SERVO_PIN      = 2;  // D4
-const int PIR_PIN        = 14; // D5
-const int RELAY_PIN      = 12; // D6
-const int BUZZER_PIN     = 13; // D7
-const int RED_LED_PIN    = 15; // D8
+#define BLYNK_TEMPLATE_ID "YOUR_TEMPLATE_ID"
+#define BLYNK_TEMPLATE_NAME "Smart Lighting Security"
+#define BLYNK_AUTH_TOKEN "YOUR_AUTH_TOKEN"
 
-const int RELAY_ON = HIGH;
-const int RELAY_OFF = LOW;
+#include &lt;ESP8266WiFi.h&gt;
+#include &lt;BlynkSimpleEsp8266.h&gt;
 
-Servo scanServo;
-RTC_DS3231 rtc;
+char ssid[] = "YOUR_WIFI_NAME";
+char pass[] = "YOUR_WIFI_PASSWORD";
 
-bool securityMode = false;
-bool motionDetected = false;
+#define PIR_PIN D5
+#define WHITE_LED D0
+#define RED_LED D8
+#define BUZZER D7
+
+bool securityMode = false; // false = normal, true = security
 
 unsigned long lastMotionTime = 0;
-const unsigned long roomEmptyDelay = 10000;
+const unsigned long lightHoldTime = 10000; // 10 seconds for white light
 
-unsigned long lastServoMove = 0;
-int servoAngle = 0;
-int servoStep = 30;
-bool servoForward = true;
+unsigned long lastSecurityMotionTime = 0;
+const unsigned long alarmHoldTime = 5000; // 5 seconds after motion stops
 
-unsigned long lastAlarmFlash = 0;
-bool alarmFlashState = false;
+unsigned long lastAlarmToggle = 0;
+const unsigned long alarmInterval = 200;
+bool alarmState = false;
 
-unsigned long lastButtonChange = 0;
-bool lastButtonReading = HIGH;
-bool stableButtonState = HIGH;
-const unsigned long debounceDelay = 50;
+bool notificationSent = false;
+
+BLYNK_WRITE(V0) {
+  securityMode = param.asInt();
+
+  if (securityMode) {
+    digitalWrite(WHITE_LED, LOW);
+    stopAlarm();
+    notificationSent = false;
+    Serial.println("BLYNK: SECURITY MODE ON");
+  } else {
+    stopAlarm();
+    Serial.println("BLYNK: NORMAL MODE ON");
+  }
+}
 
 void setup() {
   Serial.begin(115200);
+  delay(1000);
 
-  pinMode(YELLOW_LED_PIN, OUTPUT);
-  pinMode(RELAY_PIN, OUTPUT);
-  pinMode(RED_LED_PIN, OUTPUT);
-  pinMode(BUZZER_PIN, OUTPUT);
+  Serial.println();
+  Serial.println("=== PIR LIGHT + SECURITY MODE SYSTEM ===");
+  Serial.println("Blynk V0 controls Normal/Security mode");
+  Serial.println("Type 'n' for NORMAL MODE");
+  Serial.println("Type 's' for SECURITY MODE");
+
   pinMode(PIR_PIN, INPUT);
-  pinMode(BUTTON_PIN, INPUT_PULLUP);
+  pinMode(WHITE_LED, OUTPUT);
+  pinMode(RED_LED, OUTPUT);
+  pinMode(BUZZER, OUTPUT);
 
-  digitalWrite(YELLOW_LED_PIN, LOW);
-  digitalWrite(RELAY_PIN, RELAY_OFF);
-  digitalWrite(RED_LED_PIN, LOW);
-  digitalWrite(BUZZER_PIN, LOW);
+  digitalWrite(WHITE_LED, LOW);
+  digitalWrite(RED_LED, LOW);
+  digitalWrite(BUZZER, LOW);
 
-  scanServo.attach(SERVO_PIN);
-  scanServo.write(90);
+  Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass);
 
-  Wire.begin(RTC_SDA_PIN, RTC_SCL_PIN);
-
-  if (!rtc.begin()) {
-    Serial.println("RTC not found. Continuing without RTC.");
-  } else {
-    if (rtc.lostPower()) {
-      Serial.println("RTC lost power. Setting compile time.");
-      rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
-    }
-    Serial.println("RTC ready.");
+  Serial.println("Waiting for PIR to calibrate...");
+  for (int i = 60; i &gt; 0; i--) {
+    Serial.print("PIR ready in ");
+    Serial.print(i);
+    Serial.println(" seconds");
+    delay(1000);
   }
 
-  Serial.println("PIR warming up...");
-  delay(30000);
-  Serial.println("System ready.");
+  Serial.println("PIR ready!");
+  Serial.println("Starting in NORMAL MODE");
+  Blynk.virtualWrite(V0, 0);
 }
 
 void loop() {
-  handleButton();
-  scanRoom();
-  readPIR();
+  Blynk.run();
+  checkSerialCommand();
+
+  int motion = digitalRead(PIR_PIN);
 
   if (securityMode) {
-    handleSecurityMode();
+    handleSecurityMode(motion);
   } else {
-    handleNormalMode();
+    handleNormalMode(motion);
   }
 
-  printStatus();
+  delay(50);
 }
 
-void handleButton() {
-  bool reading = digitalRead(BUTTON_PIN);
+void checkSerialCommand() {
+  if (Serial.available() &gt; 0) {
+    char command = Serial.read();
 
-  if (reading != lastButtonReading) {
-    lastButtonChange = millis();
-  }
-
-  if (millis() - lastButtonChange &gt; debounceDelay) {
-    if (reading != stableButtonState) {
-      stableButtonState = reading;
-
-      if (stableButtonState == LOW) {
-        securityMode = !securityMode;
-        Serial.print("Mode changed to: ");
-        Serial.println(securityMode ? "SECURITY / ARMED" : "NORMAL / DISARMED");
-
-        if (!securityMode) {
-          stopAlarm();
-          turnRoomLightOff();
-        }
-      }
+    if (command == 's' || command == 'S') {
+      securityMode = true;
+      digitalWrite(WHITE_LED, LOW);
+      stopAlarm();
+      notificationSent = false;
+      Blynk.virtualWrite(V0, 1);
+      Serial.println("MODE CHANGED TO: SECURITY MODE");
     }
-  }
 
-  lastButtonReading = reading;
-}
-
-void scanRoom() {
-  if (millis() - lastServoMove &gt;= 500) {
-    lastServoMove = millis();
-    scanServo.write(servoAngle);
-
-    if (servoForward) {
-      servoAngle += servoStep;
-      if (servoAngle &gt;= 180) {
-        servoAngle = 180;
-        servoForward = false;
-      }
-    } else {
-      servoAngle -= servoStep;
-      if (servoAngle &lt;= 0) {
-        servoAngle = 0;
-        servoForward = true;
-      }
+    if (command == 'n' || command == 'N') {
+      securityMode = false;
+      stopAlarm();
+      Blynk.virtualWrite(V0, 0);
+      Serial.println("MODE CHANGED TO: NORMAL MODE");
     }
   }
 }
 
-void readPIR() {
-  motionDetected = digitalRead(PIR_PIN);
-  if (motionDetected == HIGH) {
-    lastMotionTime = millis();
-  }
-}
-
-void handleNormalMode() {
+void handleNormalMode(int motion) {
   stopAlarm();
+  notificationSent = false;
 
-  if (motionDetected == HIGH) {
-    turnRoomLightOn();
-  }
+  if (motion == HIGH) {
+    Serial.println("NORMAL MODE: Motion detected, white light ON");
+    lastMotionTime = millis();
+    digitalWrite(WHITE_LED, HIGH);
+  } else {
+    Serial.println("NORMAL MODE: No motion");
 
-  if (millis() - lastMotionTime &gt; roomEmptyDelay) {
-    turnRoomLightOff();
+    if (millis() - lastMotionTime &gt; lightHoldTime) {
+      digitalWrite(WHITE_LED, LOW);
+    }
   }
 }
 
-void handleSecurityMode() {
-  if (motionDetected == HIGH) {
-    alarmAction();
+void handleSecurityMode(int motion) {
+  digitalWrite(WHITE_LED, LOW);
+
+  if (motion == HIGH) {
+    Serial.println("SECURITY MODE: Motion detected, alarm ON");
+    lastSecurityMotionTime = millis();
+
+    if (!notificationSent) {
+      Blynk.logEvent("intruder_alert", "WARNING! Intruder detected in your room!");
+      notificationSent = true;
+    }
+  } else {
+    Serial.println("SECURITY MODE: No motion");
+  }
+
+  // Keep alarm running for 5 seconds after last detected motion
+  if (millis() - lastSecurityMotionTime &lt;= alarmHoldTime) {
+    flashAlarm();
   } else {
     stopAlarm();
+    notificationSent = false;
   }
 }
 
-void turnRoomLightOn() {
-  digitalWrite(YELLOW_LED_PIN, HIGH);
-  digitalWrite(RELAY_PIN, RELAY_ON);
-}
+void flashAlarm() {
+  if (millis() - lastAlarmToggle &gt;= alarmInterval) {
+    lastAlarmToggle = millis();
 
-void turnRoomLightOff() {
-  digitalWrite(YELLOW_LED_PIN, LOW);
-  digitalWrite(RELAY_PIN, RELAY_OFF);
-}
+    alarmState = !alarmState;
 
-void alarmAction() {
-  if (millis() - lastAlarmFlash &gt;= 200) {
-    lastAlarmFlash = millis();
-    alarmFlashState = !alarmFlashState;
-
-    digitalWrite(RED_LED_PIN, alarmFlashState);
-    digitalWrite(BUZZER_PIN, alarmFlashState);
-    digitalWrite(YELLOW_LED_PIN, alarmFlashState);
-    digitalWrite(RELAY_PIN, alarmFlashState ? RELAY_ON : RELAY_OFF);
+    digitalWrite(RED_LED, alarmState);
+    digitalWrite(BUZZER, alarmState);
   }
 }
 
 void stopAlarm() {
-  digitalWrite(RED_LED_PIN, LOW);
-  digitalWrite(BUZZER_PIN, LOW);
-}
-
-void printStatus() {
-  static unsigned long lastPrint = 0;
-  if (millis() - lastPrint &gt;= 3000) {
-    lastPrint = millis();
-    Serial.print("Mode: ");
-    Serial.print(securityMode ? "SECURITY" : "NORMAL");
-    Serial.print(" | Motion: ");
-    Serial.print(motionDetected ? "YES" : "NO");
-    Serial.print(" | Servo angle: ");
-    Serial.println(servoAngle);
-  }
+  digitalWrite(RED_LED, LOW);
+  digitalWrite(BUZZER, LOW);
+  alarmState = false;
 }</pre>
 </div>
 <div class="tip">
@@ -1120,10 +1091,15 @@ void printStatus() {
 <span class="step-time">5 min</span>
 </div>
 <div class="step-body" style="display:block;">
-<p>Install Blynk IoT app → create account → create a template for ESP8266 → add a device.</p>
-<p>Add widgets: Switch (arm/disarm), Button (silence), LED (status).</p>
-<p>Copy your Auth Token and paste it into your ESP8266 code, then upload.</p>
-<p>When armed, motion triggers buzzer, flashing LED, and sends a phone notification.</p>
+<p>Install the free <strong>Blynk IoT</strong> app and create a new template for <strong>ESP8266</strong> using Wi-Fi.</p>
+<div class="substeps">
+<div class="substep"><div class="substep-num">1</div><div class="substep-text">Create one virtual pin datastream: <code>V0</code>, type <strong>Integer</strong>, min <code>0</code>, max <code>1</code>. This controls Normal/Security mode.</div></div>
+<div class="substep"><div class="substep-num">2</div><div class="substep-text">Add a <strong>Switch</strong> widget and connect it to <code>V0</code>. OFF = Normal Mode. ON = Security Mode.</div></div>
+<div class="substep"><div class="substep-num">3</div><div class="substep-text">Create an event in Blynk called <code>intruder_alert</code>. This is used by the code to send the phone notification.</div></div>
+<div class="substep"><div class="substep-num">4</div><div class="substep-text">Copy the Template ID, Template Name, and Auth Token from Blynk and paste them into the code.</div></div>
+<div class="substep"><div class="substep-num">5</div><div class="substep-text">Upload the code. When the ESP8266 connects, the device should show as online in Blynk.</div></div>
+</div>
+<div class="success-box"><span class="tip-icon">✅</span><span>When the app switch is ON, motion will trigger the red LED, buzzer, and phone notification: <strong>WARNING! Intruder detected in your room!</strong></span></div>
 </div>
 </div>
 </div>
